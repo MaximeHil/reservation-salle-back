@@ -113,3 +113,18 @@ exports.bookRoom = (req, res, next) => {
             }
         }).catch((error) => console.log(error))
 }
+
+exports.getReservationsForRoom = (req, res, next) => {
+    const myRoom = req.body.name;
+    console.log(myRoom);
+
+    Reservation.find({ roomName: myRoom})
+        .then(reservs => {
+            if(reservs && reservs.length){
+                res.status(200).json({reservations: reservs, message: 'Des réservations ont été trouvés'})
+            }else {
+                res.status(200).json({reservations: [], message: 'Aucune réservation trouvée'})
+            }
+        })
+        .catch(error => res.status(400).json({error}));
+}

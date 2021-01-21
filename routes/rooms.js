@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const roomsCtrl = require('../controllers/rooms');
 
+router.post('/reservations', roomsCtrl.getReservationsForRoom);
 router.post('/reservation', roomsCtrl.bookRoom);
 router.get('/name/:filter', roomsCtrl.getRoomsWithName);
 router.get('/equipement/:filter', roomsCtrl.getRoomsWithEquipement);
