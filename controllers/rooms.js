@@ -121,7 +121,7 @@ exports.getReservationsForRoom = (req, res, next) => {
     Reservation.find({ roomName: myRoom})
         .then(reservs => {
             if(reservs && reservs.length){
-                res.status(200).json({reservations: reservs, message: 'Des réservations ont été trouvés'})
+                res.status(200).json({reservations: reservs})
             }else {
                 res.status(200).json({reservations: [], message: 'Aucune réservation trouvée'})
             }
