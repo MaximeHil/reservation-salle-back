@@ -79,6 +79,7 @@ exports.getRoomsFiltered = (req, res, next) => {
     const nameFilter = req.body.name;
     const equipementFilter = req.body.equipement;
     const capacityFilter = req.body.capacity;
+    let dateFilter = req.body.date;
 
     if(isNaN(capacityFilter)){
         res.status(400).json({ message: "La capacité de la salle doit être un nombre"});
@@ -109,12 +110,47 @@ exports.getRoomsFiltered = (req, res, next) => {
         }
     } )
 
-    if(filteredRooms && filteredRooms.length > 0){
-        res.status(200).json({ rooms: filteredRooms});
-    }else {
+    console.log("Premier filtre passé");
+    let filteredRoomsBis;
+
+    if(filteredRooms.length === 0){
         res.status(200).json({rooms: [], message: "Aucune salle ne correspond"})
+        return;
+    }
+    if(dateFilter === undefined) {
+        res.status(200).json({rooms: filteredRooms});
+        return;
     }
 
+    dateFilter = new Date(dateFilter);
+
+    console.log("Une date a été passé et des salles ont été trouvé");
+
+    Reservation.find()
+        .then( reservs => {
+            filteredRoomsBis = filteredRooms.filter(room => {
+                let isBooked = false;
+                for(let i=0; i<reservs.length; i++){
+                    if(reservs[i].roomName === room.name){
+                        if(reservs[i].begin.getTime() === dateFilter.getTime()){
+                            console.log('Cette salle est déjà réservé');
+                            isBooked = true;
+                            break;
+                        }
+                    }
+                }
+                if(!isBooked){
+                    console.log("Cette salle n'est pas réservée");
+                    return room;
+                }
+            })
+            console.log("Ceci doit être le dernier message");
+            if(filteredRoomsBis && filteredRoomsBis.length > 0){
+                res.status(200).json({ rooms: filteredRoomsBis});
+            }else {
+                res.status(200).json({rooms: [], message: "Aucune salle ne correspond"})
+            }
+        })
 }
 
 exports.bookRoom = (req, res, next) => {
