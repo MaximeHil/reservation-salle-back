@@ -72,6 +72,51 @@ exports.getRoomsWithCapacity = (req, res, next) => {
 
 }
 
+exports.getRoomsFiltered = (req, res, next) => {
+    let jsonRooms = JSON.parse(fs.readFileSync(`${__dirname}/rooms.json`, 'utf-8'));
+
+    console.log(req.body);
+    const nameFilter = req.body.name;
+    const equipementFilter = req.body.equipement;
+    const capacityFilter = req.body.capacity;
+
+    if(isNaN(capacityFilter)){
+        res.status(400).json({ message: "La capacité de la salle doit être un nombre"});
+        return;
+    }
+
+    if(capacityFilter < 0){
+        res.status(400).json({ message: "La capacité de la salle doit être positive"});
+        return;
+    }
+
+    let test;
+
+    let filteredRooms = jsonRooms.rooms.filter(room =>{
+        if(room.name.toLocaleLowerCase().includes(nameFilter.toLowerCase())){
+            if(room.capacity >= capacityFilter){
+                if(equipementFilter.length === 0){
+                    return room;
+                } else {
+                    test = room.equipements.filter(
+                        equipement => equipement.name.toLowerCase().includes(equipementFilter.toLowerCase())
+                    )
+                    if(test && test.length>0){
+                        return room;
+                    }
+                }
+            }
+        }
+    } )
+
+    if(filteredRooms && filteredRooms.length > 0){
+        res.status(200).json({ rooms: filteredRooms});
+    }else {
+        res.status(200).json({rooms: [], message: "Aucune salle ne correspond"})
+    }
+
+}
+
 exports.bookRoom = (req, res, next) => {
     console.log(req.body);
     const reservObject = req.body.reservation;
